@@ -40,8 +40,30 @@ def explore(lines: list[str]):
     processed_lines = list(map(explore_line, lines))
     symbol_to_process: list[Tuple[Position, str]]
     numbers: list[Tuple[Position, int]]
-    for idx, (symbol_to_process, _) in enumerate(processed_lines):
-        print()
+    eligible_numbers: set[Tuple[int, int]]
+    idx: int
+    total = 0
+    for idx, (_, numbers) in enumerate(processed_lines):
+        total += sum(check_numbers(idx, lines, numbers))
+    print("Total", total)
+
+
+def check_numbers(idx, lines, numbers):
+    for start, end, number in numbers:
+        number_ok = False
+        number_ok = check_number(end, idx, lines, number_ok, start)
+        print(f"number_ok {number}", number_ok)
+        if number_ok:
+            yield number
+
+
+def check_number(end, idx, lines, number_ok, start):
+    for line_index in range(max(0, idx - 1), min(len(lines), idx + 2)):
+        substr = lines[line_index][max(0, start - 1): min(len(lines[line_index]), end + 1)]
+        present = any((find_with_pos("([^\d^\.])", substr)))
+        if present:
+            return True
+    return False
 
 
 with open("./input.txt") as fp:
