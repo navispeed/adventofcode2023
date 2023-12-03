@@ -4,7 +4,9 @@ from typing import Tuple, Iterable
 Position = Tuple[int, int]
 
 
-def find_with_pos(pattern: str, line: str) -> Iterable[Tuple[Position, str]]:
+def find_with_pos(pattern: str, line: str | None) -> Iterable[Tuple[int, int, str]]:
+    if line is None:
+        return
     for match in re.finditer(pattern, line):
         yield match.start(), match.end(), match.group()
 
@@ -12,12 +14,8 @@ def find_with_pos(pattern: str, line: str) -> Iterable[Tuple[Position, str]]:
 def explore_line(line: str):
     symbol_to_process = list(find_with_pos("([^\d^\.])", line))
     numbers = list(map(lambda tu: (tu[0], tu[1], int(tu[2])), find_with_pos("(\d+)", line)))
-    # symbol_to_process = [] if symbol_to_process_res is None else symbol_to_process_res.groups()
-    # numbers = [] if numbers_res is None else numbers_res.groups()
     return symbol_to_process, numbers
 
-
-# def find_adjacent(prev_line)
 
 Line = Tuple[list[Tuple[Position, str]], list[Tuple[Position, int]]]  # symbol, numbers
 
@@ -30,9 +28,38 @@ def explore_part2(lines: list[str]):
         if len(symbols) == 0:
             continue
         for start, end, _ in symbols:
-            print()
+            total += check_symbol(end, idx, lines, start)
     print("Total", total)
 
+
+def check_symbol(end, idx, lines, start):
+    def compute_substr(line: str):
+        _start: int = start
+        _end: int = end
+        for i in range(start - 1, -1, -1):
+            if line[i].isnumeric():
+                _start = i
+                continue
+            break
+        for i in range(end, len(line)):
+            if line[i].isnumeric():
+                _end = i
+                continue
+            break
+        if _start == -1 or _end == -1:
+            return None
+        return line[_start:_end + 1]
+
+    numbers = []
+    for line_index in range(max(0, idx - 1), min(len(lines), idx + 2)):
+        substr = compute_substr(lines[line_index])
+        m = list((find_with_pos(r"(\d+)", substr)))
+        if len(m) == 1:
+            numbers.append(int(m[0][2]))
+
+    if len(numbers) == 2:
+        return numbers[0] * numbers[1]
+    return 0
 
 
 def explore_part1(lines: list[str]):
