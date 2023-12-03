@@ -3,8 +3,6 @@ from collections import defaultdict
 Subset = dict[str, int]
 Game = list[Subset]
 
-storage: dict[int, dict[int,]] = defaultdict(dict)
-
 
 def process_subset(subset_line: str) -> Subset:
     res: Subset = {}
