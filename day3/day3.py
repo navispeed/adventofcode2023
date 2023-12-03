@@ -12,7 +12,7 @@ def find_with_pos(pattern: str, line: str | None) -> Iterable[Tuple[int, int, st
 
 
 def explore_line(line: str):
-    symbol_to_process = list(find_with_pos("([^\d^\.])", line))
+    symbol_to_process = list(find_with_pos(r"(\*)", line))
     numbers = list(map(lambda tu: (tu[0], tu[1], int(tu[2])), find_with_pos("(\d+)", line)))
     return symbol_to_process, numbers
 
@@ -29,6 +29,7 @@ def explore_part2(lines: list[str]):
             continue
         for start, end, _ in symbols:
             total += check_symbol(end, idx, lines, start)
+        print("\\" * 50)
     print("Total", total)
 
 
@@ -51,14 +52,21 @@ def check_symbol(end, idx, lines, start):
         return line[_start:_end + 1]
 
     numbers = []
+
     for line_index in range(max(0, idx - 1), min(len(lines), idx + 2)):
         substr = compute_substr(lines[line_index])
         m = list((find_with_pos(r"(\d+)", substr)))
-        if len(m) == 1:
-            numbers.append(int(m[0][2]))
+        for n in m:
+            numbers.append(int(n[2]))
+            print("substr: ", substr, int(n[2]))
 
     if len(numbers) == 2:
+        print(f"{numbers[0]} * {numbers[1]}")
         return numbers[0] * numbers[1]
+    else:
+        if len(numbers) > 2:
+            print("YOLO")
+        print("Y'a r")
     return 0
 
 
