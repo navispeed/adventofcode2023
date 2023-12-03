@@ -29,7 +29,6 @@ def explore_part2(lines: list[str]):
             continue
         for start, end, _ in symbols:
             total += check_symbol(end, idx, lines, start)
-        print("\\" * 50)
     print("Total", total)
 
 
@@ -58,15 +57,9 @@ def check_symbol(end, idx, lines, start):
         m = list((find_with_pos(r"(\d+)", substr)))
         for n in m:
             numbers.append(int(n[2]))
-            print("substr: ", substr, int(n[2]))
 
     if len(numbers) == 2:
-        print(f"{numbers[0]} * {numbers[1]}")
         return numbers[0] * numbers[1]
-    else:
-        if len(numbers) > 2:
-            print("YOLO")
-        print("Y'a r")
     return 0
 
 
