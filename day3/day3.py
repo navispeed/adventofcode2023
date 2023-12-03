@@ -1,21 +1,7 @@
 import re
-from typing import Tuple, Iterable, List
+from typing import Tuple, Iterable
 
-
-class Line:
-    def __init__(self, line_as_str: str, symbols: list[str], numbers: list[int]):
-        pass
-
-
-Engine = list[Line]
 Position = Tuple[int, int]
-
-
-class Symbol:
-    adjacent: list[int]
-
-    def __init__(self, engine: Engine, position: Position):
-        pass
 
 
 def find_with_pos(pattern: str, line: str) -> Iterable[Tuple[Position, str]]:
@@ -36,11 +22,22 @@ def explore_line(line: str):
 Line = Tuple[list[Tuple[Position, str]], list[Tuple[Position, int]]]  # symbol, numbers
 
 
-def explore(lines: list[str]):
+def explore_part2(lines: list[str]):
     processed_lines = list(map(explore_line, lines))
-    symbol_to_process: list[Tuple[Position, str]]
+    idx: int
+    total = 0
+    for idx, (symbols, _) in enumerate(processed_lines):
+        if len(symbols) == 0:
+            continue
+        for start, end, _ in symbols:
+            print()
+    print("Total", total)
+
+
+
+def explore_part1(lines: list[str]):
+    processed_lines = list(map(explore_line, lines))
     numbers: list[Tuple[Position, int]]
-    eligible_numbers: set[Tuple[int, int]]
     idx: int
     total = 0
     for idx, (_, numbers) in enumerate(processed_lines):
@@ -50,14 +47,13 @@ def explore(lines: list[str]):
 
 def check_numbers(idx, lines, numbers):
     for start, end, number in numbers:
-        number_ok = False
-        number_ok = check_number(end, idx, lines, number_ok, start)
+        number_ok = check_number(end, idx, lines, start)
         print(f"number_ok {number}", number_ok)
         if number_ok:
             yield number
 
 
-def check_number(end, idx, lines, number_ok, start):
+def check_number(end, idx, lines, start):
     for line_index in range(max(0, idx - 1), min(len(lines), idx + 2)):
         substr = lines[line_index][max(0, start - 1): min(len(lines[line_index]), end + 1)]
         present = any((find_with_pos("([^\d^\.])", substr)))
@@ -69,4 +65,4 @@ def check_number(end, idx, lines, number_ok, start):
 with open("./input.txt") as fp:
     lines = list(map(str.strip, fp.readlines()))
 
-explore(lines)
+explore_part2(lines)
