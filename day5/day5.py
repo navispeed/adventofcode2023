@@ -1,8 +1,8 @@
 from typing import Tuple
 
+import numba
 import numpy as np
 from numba.typed import Dict
-import numba
 
 
 def build_map(buffer: list[str]) -> dict[int, Tuple[int, int]]:
@@ -38,9 +38,12 @@ def extract_seed(line: str) -> list[int]:
 
 @numba.jit(fastmath=True, nopython=True)
 def map_to_value(a_map: dict[int, Tuple[int, int]], point):
+    r = 0
     for start, (destination, _range) in a_map.items():
         if start <= point <= start + _range:
-            return destination + (point - start)
+            r = destination + (point - start)
+    if r != 0:
+        return r
     return point
 
 
@@ -63,10 +66,9 @@ def seed_to_part2(entry_seeds: list[int],
                   seed_to_soil: dict[int, Tuple[int, int]]) -> list[int]:
     assert len(entry_seeds) % 2 == 0
     seeds: list[int] = [0]
-    s = 0
+    seeds.remove(0)  # hack for numba
 
     for start_pair_idx in range(0, len(entry_seeds), 2):
-
         start = entry_seeds[start_pair_idx]
         end = start + entry_seeds[start_pair_idx + 1]
 
@@ -99,10 +101,7 @@ def to_numba_dict(original: dict):
 @numba.jit(fastmath=True, nopython=True, parallel=True)
 def part2(maps, seeds: list[int]):
     seeds = seed_to_part2(seeds, maps["seed-to-soil"])
-    print(len(seeds))
-    print("Starting compute")
-
-    res = np.zeros(len(seeds))
+    min_location = 2 ** 32
 
     for seed_id in numba.prange(len(seeds)):
         seed = seeds[seed_id]
@@ -114,13 +113,9 @@ def part2(maps, seeds: list[int]):
         current_location = map_to_value(maps["light-to-temperature"], current_location)
         current_location = map_to_value(maps["temperature-to-humidity"], current_location)
         current_location = map_to_value(maps["humidity-to-location"], current_location)
-        res[seed_id] = current_location
-        # positions.append(current_location)
-
-        # print(seed, current_location)
-        # min_location = min(current_location, min_location)
+        min_location = min(current_location, min_location)
     #
-    print(min(res))
+    print(min_location)
 
 
 if __name__ == '__main__':
