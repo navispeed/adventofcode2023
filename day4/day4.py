@@ -1,4 +1,3 @@
-import math
 from collections import defaultdict
 
 with open("./input.txt") as fp:
