@@ -19,6 +19,6 @@ for idx, line in enumerate(lines):
             for i in range(idx + 1, idx + len(intersection) + 1):
                 scratch[i] += 1
     else:
-        scratch[idx] += 0
+        scratch[idx] += 0  # if we never saw the card, force the card to exist. Else, do nothing.
 
 print(total, (dict(scratch), sum(scratch.values())))
