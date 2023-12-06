@@ -1,7 +1,6 @@
 from typing import Tuple
 
 import numba
-import numpy as np
 from numba.typed import Dict
 
 
@@ -48,20 +47,6 @@ def map_to_value(a_map: dict[int, Tuple[int, int]], point):
 
 
 @numba.jit(fastmath=True, nopython=True)
-def intersect(a: Tuple[int, int], b: Tuple[int, int]) -> Tuple[int, int] | None:
-    # r1 = [0, 100] r2 = [50, 60] => 50,60
-    # r1 = [50, 55] r2 = [50, 60] => 50,55
-    # r1 = [0,20] r2 = [50,60] => None
-
-    min_ab = min(a[1], b[1])
-    max_ab = max(a[0], b[0])
-    is_intersect = min_ab - max_ab >= 0
-    if not is_intersect:
-        return (-1, -1)
-    return max_ab, min_ab
-
-
-@numba.jit(fastmath=True, nopython=True)
 def seed_to_part2(entry_seeds: list[int],
                   seed_to_soil: dict[int, Tuple[int, int]]) -> list[int]:
     assert len(entry_seeds) % 2 == 0
@@ -73,17 +58,6 @@ def seed_to_part2(entry_seeds: list[int],
         end = start + entry_seeds[start_pair_idx + 1]
 
         seeds.extend(range(start, end))
-
-        # for sts_entry_start, (sts_entry_destination, sts_entry_range) in seed_to_soil.items():
-        #     # check if range start/end is in range of this dict
-        #     r = intersect((start, end), (sts_entry_start, sts_entry_start + sts_entry_range))
-        #     if r == (-1, -1):
-        #         continue
-        #     # s += r[1] - r[0]
-        #     # print(r[0], r[1])
-        #     seeds.extend(list(range(r[0], r[1])))
-
-    print(f"seed {len(seeds)}")
 
     return seeds
 
@@ -125,7 +99,8 @@ if __name__ == '__main__':
     maps: dict[str, dict[int]] = parse(lines[2:])
     # seeds = seed_to_part2(extract_seed(lines[0]), numba_dict)
     part2(to_numba_dict(maps), extract_seed(lines[0]))
-    #
+
+    # Part 1:
     # print(f"Seeds: {len(seeds)}")
     #
     # min_location = 2 ** 32
