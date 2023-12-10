@@ -1,5 +1,5 @@
 import sys
-from typing import List, Tuple, Iterable
+from typing import Tuple, Iterable
 
 import numpy
 
@@ -39,14 +39,7 @@ def find_next(current: Position) -> list[Position]:
     :param current:
     :return:
     """
-    case_to_check = set(
-        [(current[0] - 1, y) for y in range(current[1] - 1, current[1] + 2) if
-         y >= 0 and current[0] - 1 > 0] +
-        [(current[0], y) for y in range(current[1] - 1, current[1] + 2) if
-         y >= 0 and current[0] > 0] +
-        [(current[0] + 1, y) for y in range(current[1] - 1, current[1] + 2) if
-         y >= 0 and current[0] + 1 > 0]
-    )
+    case_to_check = nearby_position(current)
 
     # debug
     def validate(poss: Iterable[Position]) -> list[Position]:
@@ -75,6 +68,18 @@ def find_next(current: Position) -> list[Position]:
             raise RuntimeError()
 
 
+def nearby_position(current):
+    case_to_check = set(
+        [(current[0] - 1, y) for y in range(current[1] - 1, current[1] + 2) if
+         y >= 0 and current[0] - 1 >= 0] +
+        [(current[0], y) for y in range(current[1] - 1, current[1] + 2) if
+         y >= 0 and current[0] >= 0] +
+        [(current[0] + 1, y) for y in range(current[1] - 1, current[1] + 2) if
+         y >= 0 and current[0] + 1 >= 0]
+    )
+    return case_to_check
+
+
 find_next(start_index)
 
 
@@ -97,7 +102,7 @@ def explore():
     for i in range(1, filled_map.max() - 1):
         if numpy.isclose(i, filled_map).sum() != 2:
             return False
-    return True
+    return True and filled_map.max() > 1
 
 
 # def debug(c: str):
@@ -120,7 +125,7 @@ def explore():
 #             return []
 #         case _:
 #             raise RuntimeError()
-
+filled_map: numpy.ndarray
 
 for choice in "FJ|-7L":
     filled_map = numpy.array([[-1 for _ in range(len(lines[0]))] for i in range(len(lines))])
@@ -128,8 +133,43 @@ for choice in "FJ|-7L":
     l = l[:start_index[1]] + choice + l[start_index[1] + 1:]
     lines[start_index[0]] = l
     r = explore()
-    print(filled_map)
-    print("with", choice, "max:", filled_map.max(), numpy.isclose(filled_map, 1).sum(), r)
+    if r:
+        print(filled_map)
+        print("with", choice, "max:", filled_map.max(), numpy.isclose(filled_map, 1).sum(), r)
 
-# class Pipe:
-#     def __init__(self, current: Position, next: Position):
+# part 2
+part2_map = filled_map.tolist()
+
+
+def fill(start: Position, idx: int):
+    acc: list[Position] = [start]
+    seen: set[Position] = set()
+    while acc:
+        current = acc.pop(0)
+        if current in seen:
+            continue
+        seen.add(current)
+        if part2_map[current[0]][current[1]] == -1:
+            part2_map[current[0]][current[1]] = idx
+        else:
+            continue
+        for p in nearby_position(current):
+            if not ((0 <= p[0] < len(lines)) and (0 <= p[1] < len(lines))):
+                continue
+            if p not in seen:
+                acc.append(p)
+
+
+idx_count = -10
+for x1 in (range(len(part2_map))):
+    for y1 in (range(len(part2_map[0]))):
+        if part2_map[x1][y1] == -1:
+            fill((x1, y1), idx_count)
+            idx_count -= 1
+
+r = {}
+for idx in range(-10, idx_count, -1):
+    r[idx] = numpy.isclose(part2_map, idx).sum()
+
+print(numpy.array(part2_map))
+print(r, "\n", list(sorted(r.values(), reverse=True)))
