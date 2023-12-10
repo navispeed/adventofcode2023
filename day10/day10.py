@@ -67,7 +67,6 @@ def find_next(current: Position) -> list[Position]:
         case _:
             raise RuntimeError()
 
-
 def nearby_position(current):
     case_to_check = set(
         [(current[0] - 1, y) for y in range(current[1] - 1, current[1] + 2) if
@@ -146,18 +145,16 @@ def fill(start: Position, idx: int):
     seen: set[Position] = set()
     while acc:
         current = acc.pop(0)
-        if current in seen:
-            continue
-        seen.add(current)
         if part2_map[current[0]][current[1]] == -1:
             part2_map[current[0]][current[1]] = idx
         else:
             continue
         for p in nearby_position(current):
-            if not ((0 <= p[0] < len(lines)) and (0 <= p[1] < len(lines))):
+            if not ((0 <= p[0] < len(lines)) and (0 <= p[1] < len(lines[0]))):
                 continue
             if p not in seen:
                 acc.append(p)
+                seen.add(current)
 
 
 idx_count = -10
@@ -171,5 +168,6 @@ r = {}
 for idx in range(-10, idx_count, -1):
     r[idx] = numpy.isclose(part2_map, idx).sum()
 
+r.pop(-10)
 print(numpy.array(part2_map))
-print(r, "\n", list(sorted(r.values(), reverse=True)))
+print(r, "\n", list(sorted(r.values(), reverse=True)), sum(r.values()))
