@@ -94,7 +94,7 @@ def explore():
             if n in seen:
                 continue
             acc.append((n, c + 1, current))
-    for i in range(filled_map.max() - 1):
+    for i in range(1, filled_map.max() - 1):
         if numpy.isclose(i, filled_map).sum() != 2:
             return False
     return True
